@@ -3,16 +3,11 @@ server:
 
 management:
   security:
-    enabled: false
+    enabled: true
 security:
   basic:
-    enabled: false
+    enabled: true
 
-spring:
-  application:
-    admin:
-      enabled: true
-  
 
 ---
 spring:
@@ -23,8 +18,7 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: ${EUREKA_URI:http://localhost:8761}/eureka
-      
+      defaultZone: ${EUREKA_URI:http://localhost:8761}/eureka    
 
 ---
 
