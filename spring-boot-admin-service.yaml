@@ -1,0 +1,78 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: spring-boot-admin
+  labels:
+    app: spring-boot-admin
+    visualize: "true"
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-boot-admin
+  template:
+    metadata:
+      labels:
+        app: spring-boot-admin
+        version: "v1"
+        visualize: "true"
+      annotations:
+        visualizer/uses: eureka-server       
+    spec:
+      containers:
+      - name: spring-boot-admin
+        image: gcr.io/appsutility-141503/spring-boot-admin:v1
+        imagePullPolicy: Always
+        resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"        
+        env:
+        - name: EUREKA_URI
+          value: http://eureka-server:8761
+        - name: SPRING_PROFILES_ACTIVE
+          value: cloud
+        ports:
+        - name: http
+          containerPort: 8763
+      imagePullSecrets:
+      - name: gcr.io  
+          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-boot-admin
+  labels:
+    name: spring-boot-admin
+    visualize: "true"
+spec:
+  selector:
+    app: spring-boot-admin
+  ports:
+    - protocol: TCP
+      port: 8763
+      targetPort: 8763
+  sessionAffinity: None    
+---
+
+
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: spring-boot-admin
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: spring-boot-admin
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 50          
